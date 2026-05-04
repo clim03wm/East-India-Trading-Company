@@ -112,22 +112,20 @@ h2 {
   overflow: hidden;
   border: 3px solid var(--brown);
   border-radius: 16px;
-  background:
-    radial-gradient(circle at 18% 36%, rgba(88,112,73,0.7) 0 5%, transparent 6%),
-    radial-gradient(circle at 46% 62%, rgba(88,112,73,0.65) 0 7%, transparent 8%),
-    radial-gradient(circle at 75% 48%, rgba(88,112,73,0.65) 0 8%, transparent 9%),
-    radial-gradient(circle at 84% 70%, rgba(88,112,73,0.65) 0 5%, transparent 6%),
-    linear-gradient(135deg, #d5c090 0%, #c19b63 45%, #7aa0a7 46%, #6b8b96 100%);
+  background: url("map.svg") center / cover no-repeat;
 }
 
 .map::before {
-  content: "";
+  content: "Click a port, then use Actions to sail, buy, sell, attack, or build.";
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(75,49,25,0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(75,49,25,0.18) 1px, transparent 1px);
-  background-size: 44px 44px;
+  left: 14px;
+  top: 14px;
+  z-index: 1;
+  padding: 8px 12px;
+  border: 2px solid var(--brown);
+  border-radius: 999px;
+  background: rgba(255, 242, 201, 0.88);
+  font-weight: 700;
   pointer-events: none;
 }
 
@@ -224,7 +222,13 @@ h2 {
   color: white;
 }
 
-.action-btn:hover,
+.action-btn:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+  filter: grayscale(.35);
+}
+
+.action-btn:hover:not(:disabled),
 .primary-btn:hover {
   transform: translateY(1px);
   box-shadow: 0 2px 0 var(--dark-brown);
@@ -240,6 +244,15 @@ h2 {
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-top: 18px;
+}
+
+.hint {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-left: 4px solid var(--green);
+  background: rgba(255,242,201,.78);
+  border-radius: 8px;
+  font-size: .95rem;
 }
 
 .list {
