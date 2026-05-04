@@ -77,7 +77,8 @@ const shipTypes = {
 
 let state = {
   month: 1,
-  money: 2500,
+  money: 6000,
+  debt: 0,
   selectedPort: "london",
   location: "london",
   ships: [
@@ -90,7 +91,7 @@ let state = {
     { name: "Dutch VOC", money: 2700, home: "batavia", location: "batavia", power: 48, color: "blue" },
     { name: "French Company", money: 1900, home: "lisbon", location: "cape", power: 30, color: "green" }
   ],
-  log: ["The Crown has granted your company a charter. One merchantman waits in London."],
+  log: ["The Crown has granted your company a charter. One merchantman waits in London. Click another port, then Sail."],
   gameOver: false
 };
 
@@ -207,6 +208,10 @@ function renderPortPanel() {
   ).join("");
 }
 
+function canAfford(cost) {
+  return state.money >= cost;
+}
+
 function renderCompany() {
   document.getElementById("turnLabel").textContent = `Month ${state.month}`;
   document.getElementById("moneyLabel").textContent = money(state.money);
@@ -217,7 +222,8 @@ function renderCompany() {
     ["Money", money(state.money)],
     ["Cargo", `${cargoUsed()} / ${cargoCapacity()}`],
     ["Fleet Combat", Math.round(fleetCombat())],
-    ["Influence", state.influence]
+    ["Influence", state.influence],
+    ["Debt", money(state.debt)]
   ];
 
   document.getElementById("companyDetails").innerHTML = rows.map(([a,b]) =>
@@ -229,47 +235,70 @@ function renderActions() {
   const port = selectedPort();
   const here = state.selectedPort === state.location;
   const buttons = [];
+  const hint = document.getElementById("actionHint");
 
   if (!here) {
-    buttons.push(actionButton(`Sail to ${port.name}`, "sail", () => sailTo(state.selectedPort)));
+    const travelCost = voyageCost();
+    hint.textContent = `Selected: ${port.name}. Sail there for ${money(travelCost)}, then buy goods, attack, or repair.`;
+    buttons.push(actionButton(`Sail to ${port.name} (${money(travelCost)})`, "sail", () => sailTo(state.selectedPort), !canAfford(travelCost)));
+    buttons.push(actionButton("End Month", "build", nextTurn));
   }
 
   if (here) {
+    hint.textContent = state.location === "london"
+      ? "You are in London. Sell Eastern cargo, build ships, or choose an overseas port to sail."
+      : `You are in ${port.name}. Buy local goods, sell cargo, attack the port, repair, or choose another port to sail.`;
+
     Object.keys(port.goods).forEach(goodId => {
-      buttons.push(actionButton(`Buy ${goods[goodId].name} (${money(priceAt(state.location, goodId))})`, "money", () => buyGood(goodId)));
+      const cost = priceAt(state.location, goodId) * 10;
+      buttons.push(actionButton(`Buy 10 ${goods[goodId].name} (${money(cost)})`, "money", () => buyGood(goodId), !canAfford(cost) || cargoUsed() + 10 > cargoCapacity()));
     });
 
     Object.keys(state.cargo).filter(g => state.cargo[g] > 0).forEach(goodId => {
-      buttons.push(actionButton(`Sell ${goods[goodId].name} (${money(priceAt(state.location, goodId))})`, "money", () => sellGood(goodId)));
+      buttons.push(actionButton(`Sell 10 ${goods[goodId].name} (${money(priceAt(state.location, goodId) * Math.min(10, state.cargo[goodId]))})`, "money", () => sellGood(goodId)));
     });
+
+    if (cargoUsed() > 0) {
+      buttons.push(actionButton("Sell All Cargo", "money", sellAllCargo));
+    }
 
     if (port.shipyard || state.location === "london") {
       Object.entries(shipTypes).forEach(([typeId, ship]) => {
-        buttons.push(actionButton(`Build ${ship.name} (${money(ship.cost)})`, "build", () => buildShip(typeId)));
+        buttons.push(actionButton(`Build ${ship.name} (${money(ship.cost)})`, "build", () => buildShip(typeId), !canAfford(ship.cost)));
       });
     }
 
     if (state.location !== "london" && port.owner !== "England") {
-      buttons.push(actionButton(`Attack ${port.name}`, "danger", () => attackPort(state.location)));
+      buttons.push(actionButton(`Attack ${port.name}`, "danger", () => attackPort(state.location), fleetCombat() < 20));
     }
 
-    buttons.push(actionButton("Repair Fleet", "build", repairFleet));
+    const repairCost = repairFleetCost();
+    buttons.push(actionButton(`Repair Fleet (${money(repairCost)})`, "build", repairFleet, repairCost <= 0 || !canAfford(repairCost)));
+
+    if (state.location === "london") {
+      buttons.push(actionButton("Take Company Loan (+£1,000)", "money", takeLoan));
+    }
   }
 
   actionsEl.innerHTML = "";
   buttons.forEach(btn => actionsEl.appendChild(btn));
 }
 
-function actionButton(text, cls, fn) {
+function actionButton(text, cls, fn, disabled = false) {
   const btn = document.createElement("button");
   btn.className = `action-btn ${cls}`;
   btn.textContent = text;
+  btn.disabled = disabled;
   btn.addEventListener("click", fn);
   return btn;
 }
 
+function voyageCost() {
+  return 80 + state.ships.length * 25;
+}
+
 function sailTo(portId) {
-  const travelCost = 80 + state.ships.length * 25;
+  const travelCost = voyageCost();
   if (state.money < travelCost) {
     showModal("Not Enough Money", `You need ${money(travelCost)} to supply the voyage.`);
     return;
@@ -312,6 +341,21 @@ function sellGood(goodId) {
   checkWin();
 }
 
+function sellAllCargo() {
+  let total = 0;
+  Object.keys(state.cargo).forEach(goodId => {
+    const amount = state.cargo[goodId] || 0;
+    if (amount > 0) {
+      total += priceAt(state.location, goodId) * amount;
+      state.cargo[goodId] = 0;
+    }
+  });
+  state.money += total;
+  addLog(`Sold all cargo in ${currentPort().name} for ${money(total)}.`);
+  render();
+  checkWin();
+}
+
 function buildShip(typeId) {
   const ship = shipTypes[typeId];
   if (state.money < ship.cost) {
@@ -324,9 +368,14 @@ function buildShip(typeId) {
   render();
 }
 
+function repairFleetCost() {
+  const missing = state.ships.reduce((sum, ship) => sum + (100 - ship.hp), 0);
+  return Math.round(missing * 6);
+}
+
 function repairFleet() {
   const missing = state.ships.reduce((sum, ship) => sum + (100 - ship.hp), 0);
-  const cost = Math.round(missing * 6);
+  const cost = repairFleetCost();
   if (missing <= 0) {
     showModal("No Repairs Needed", "Your fleet is already in fine condition.");
     return;
@@ -428,9 +477,16 @@ function runRivals() {
 }
 
 function payMaintenance() {
-  const cost = state.ships.length * 45;
+  const cost = state.ships.length * 45 + Math.round(state.debt * 0.04);
   state.money -= cost;
-  addLog(`Fleet wages and maintenance cost ${money(cost)}.`);
+  addLog(`Fleet wages and debt interest cost ${money(cost)}.`);
+}
+
+function takeLoan() {
+  state.money += 1000;
+  state.debt += 1200;
+  addLog("Took a company loan. You received £1,000 and owe £1,200.");
+  render();
 }
 
 function checkWin() {
