@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monsoon Empire: Charter Capital</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">A Respectable Advertisement for Unlimited Profit</p>
+        <h1>Monsoon Empire</h1>
+        <p>Build ships, assign trade routes, and let commerce do the sailing.</p>
+      </div>
+      <div class="top-stats">
+        <span id="cashLabel">£8,000</span>
+        <span id="incomeLabel">£0/min</span>
+        <span id="shipLabel">0 Ships</span>
+        <button id="pauseBtn" class="small-btn">Pause</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="map-panel">
+        <div class="map-title-row">
+          <div>
+            <h2>Trade Map</h2>
+            <p>Choose a port, build ships, then assign them to an automatic route.</p>
+          </div>
+          <div class="ad-strip" id="slogan">Pepper today. Profit tomorrow.</div>
+        </div>
+        <div id="map" class="map"></div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="card selected-card">
+          <h2 id="selectedPortName">London</h2>
+          <p id="selectedPortDesc">Home office, shipyard, and final market.</p>
+          <div id="portDetails" class="details"></div>
+        </section>
+
+        <section class="card">
+          <h2>Board Room</h2>
+          <div id="companyDetails" class="details"></div>
+        </section>
+
+        <section class="card action-card">
+          <h2>Capitalist Actions</h2>
+          <p class="hint" id="actionHint">Select a destination port, then build or assign ships.</p>
+          <div id="actions" class="actions"></div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="bottom-grid">
+      <section class="card fleet-card">
+        <h2>Automatic Fleet</h2>
+        <div id="fleetList" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Company Upgrades</h2>
+        <div id="upgradeList" class="list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Advertising Office</h2>
+        <div id="adOffice" class="list"></div>
+      </section>
+
+      <section class="card log-card">
+        <h2>Company Ledger</h2>
+        <div id="log" class="log"></div>
+      </section>
+    </section>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="game.js"></script>
+</body>
+</html>
