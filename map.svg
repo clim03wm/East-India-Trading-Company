@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650">
+  <defs>
+    <linearGradient id="sea" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#a4c5c3"/>
+      <stop offset="1" stop-color="#6f9aa5"/>
+    </linearGradient>
+    <filter id="shadow"><feDropShadow dx="2" dy="3" stdDeviation="4" flood-opacity=".25"/></filter>
+  </defs>
+  <rect width="1000" height="650" fill="#d7c08b"/>
+  <path d="M0 0h1000v650H0z" fill="url(#sea)"/>
+  <path d="M0,0 H430 C390,90 335,150 320,230 C300,335 380,430 355,650 H0 Z" fill="#c39a5e" filter="url(#shadow)"/>
+  <path d="M260,100 C335,75 390,95 425,155 C460,225 430,280 455,330 C490,405 555,475 535,650 H320 C330,500 260,430 235,335 C215,250 240,175 260,100Z" fill="#b78f57" opacity=".95" filter="url(#shadow)"/>
+  <path d="M560,250 C625,220 690,235 720,285 C745,330 725,385 680,420 C635,455 595,430 570,385 C545,340 520,285 560,250Z" fill="#b88d54" filter="url(#shadow)"/>
+  <path d="M665,355 C715,350 755,385 770,430 C790,490 760,540 710,555 C665,570 640,525 650,475 C660,425 620,390 665,355Z" fill="#af864f" filter="url(#shadow)"/>
+  <path d="M760,260 C815,215 910,215 965,275 C1000,315 1000,650 1000,650 H820 C845,570 855,485 815,425 C780,375 725,330 760,260Z" fill="#b79258" filter="url(#shadow)"/>
+  <path d="M780,470 C845,460 895,505 900,565 C855,590 805,575 780,540 C760,515 755,490 780,470Z" fill="#a8824d"/>
+  <g opacity=".22" stroke="#51351d" stroke-width="1">
+    <path d="M0 100H1000M0 200H1000M0 300H1000M0 400H1000M0 500H1000M0 600H1000"/>
+    <path d="M100 0V650M200 0V650M300 0V650M400 0V650M500 0V650M600 0V650M700 0V650M800 0V650M900 0V650"/>
+  </g>
+  <g fill="#50371f" font-family="Georgia, serif" font-size="28" opacity=".55" font-weight="700">
+    <text x="100" y="155">EUROPE</text>
+    <text x="220" y="430">AFRICA</text>
+    <text x="560" y="345">INDIA</text>
+    <text x="770" y="345">CHINA</text>
+    <text x="700" y="535">INDIES</text>
+    <text x="465" y="155" font-size="24">INDIAN OCEAN</text>
+  </g>
+</svg>
